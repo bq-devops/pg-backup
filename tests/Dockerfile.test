@@ -1,0 +1,12 @@
+# Тестовый образ: PostgreSQL 16 + bats + тестовые данные.
+# Хосту для прогона тестов нужен только docker.
+FROM postgres:16-alpine
+
+RUN apk add --no-cache bats
+
+# Тестовые учётные данные (не production-секреты)
+ENV POSTGRES_USER=tester
+ENV POSTGRES_PASSWORD=e2e-test-only
+
+# Тестовые БД создаются при первой инициализации контейнера
+COPY init/01-setup.sh /docker-entrypoint-initdb.d/01-setup.sh

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Shim для pg_dump. Поведение управляется env-переменными:
+#   SHIM_PG_DUMP_FAIL=1         — завершиться с ошибкой (код 1) для всех баз
+#   SHIM_PG_DUMP_FAIL_DBS="a b" — завершиться с ошибкой только для указанных баз
+#   SHIM_PG_DUMP_TRUNCATE=1     — неполный дамп (без маркера завершения)
+# По умолчанию — корректный минимальный дамп.
+db="${1:-}"
+
+if [[ "${SHIM_PG_DUMP_FAIL:-0}" == "1" ]]; then
+  echo "pg_dump: error: connection to server failed" >&2
+  exit 1
+fi
+
+if [[ -n "${SHIM_PG_DUMP_FAIL_DBS:-}" ]]; then
+  for faildb in $SHIM_PG_DUMP_FAIL_DBS; do
+    if [[ "$db" == "$faildb" ]]; then
+      echo "pg_dump: error: connection to server failed" >&2
+      exit 1
+    fi
+  done
+fi
+
+echo "-- PostgreSQL database dump"
+if [[ "${SHIM_PG_DUMP_TRUNCATE:-0}" != "1" ]]; then
+  echo "-- PostgreSQL database dump complete"
+fi
+exit 0

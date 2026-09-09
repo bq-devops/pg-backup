@@ -1,0 +1,23 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Install shfmt (v3.14.1)
+        run: |
+          curl -sSfL https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_linux_amd64 -o /usr/local/bin/shfmt
+          chmod +x /usr/local/bin/shfmt
+          shfmt --version
+
+      - name: Run lint (shellcheck + shfmt)
+        run: make lint

@@ -1,0 +1,22 @@
+# Образ для deploy-теста: Ubuntu 24.04 + PostgreSQL-сервер + утилиты.
+# Служит для проверки инструкций из docs/DEPLOYMENT.md в чистом окружении.
+# Хосту для прогона нужен только docker.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Зависимости из DEPLOYMENT.md + утилиты для теста
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    sudo \
+    postgresql \
+    postgresql-client \
+    gzip \
+    logrotate \
+    && rm -rf /var/lib/apt/lists/*
+
+# Тестовые данные + скрипт запуска
+COPY init/01-setup.sh /usr/local/bin/deploy-init.sh
+COPY init/start.sh    /usr/local/bin/deploy-start.sh
+RUN chmod +x /usr/local/bin/deploy-init.sh /usr/local/bin/deploy-start.sh
+
+CMD ["/usr/local/bin/deploy-start.sh"]

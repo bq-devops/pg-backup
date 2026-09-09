@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Shim для gzip. Поведение управляется env-переменными:
+#   SHIM_GZIP_FAIL=1    — завершиться с ошибкой (код 1)
+#   SHIM_GZIP_CORRUPT=1 — создать «битый» архив (сжатие «успешно»,
+#                         но целостность gzip -t не пройдёт)
+# По умолчанию — делегирует реальному gzip.
+if [[ "${SHIM_GZIP_FAIL:-0}" == "1" ]]; then
+  echo "gzip: compression failed" >&2
+  exit 1
+fi
+if [[ "${SHIM_GZIP_CORRUPT:-0}" == "1" ]]; then
+  for arg in "$@"; do
+    if [[ "$arg" != -* ]]; then
+      printf 'not a real gzip archive' >"${arg}.gz"
+      rm -f -- "$arg"
+      exit 0
+    fi
+  done
+fi
+exec /bin/gzip "$@"

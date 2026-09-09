@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Shim для date. Поведение управляется env-переменной:
+#   SHIM_DATE_STAMP=<stamp> — вернуть фиксированный stamp для формата
+#                             %Y%m%d-%H%M%S (используется move_archive)
+# Остальные форматы (например, лог %Y-%m-%d %H:%M:%S) — реальный date.
+if [[ -n "${SHIM_DATE_STAMP:-}" ]]; then
+  for arg in "$@"; do
+    if [[ "$arg" == *"%Y%m%d"* ]]; then
+      echo "$SHIM_DATE_STAMP"
+      exit 0
+    fi
+  done
+fi
+exec /bin/date "$@"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Shim для df. Поведение управляется env-переменными:
+#   SHIM_DF_MB=100 — отчитаться о 100 МБ свободного места
+# По умолчанию — делегирует реальному df.
+#
+# Скрипт читает свободное место так: df -Pk <путь> | awk 'NR==2 {print int($4/1024)}'
+# т.е. 4-е поле 2-й строки — свободные блоки в 1К.
+if [[ -n "${SHIM_DF_MB:-}" ]]; then
+  kb=$((SHIM_DF_MB * 1024))
+  printf 'Filesystem 1K-blocks Used Available Use%% Mounted on\n'
+  printf 'shim %s 1024 %s 50%% /\n' "$((kb + 1024))" "$kb"
+  exit 0
+fi
+exec /bin/df "$@"

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Shim для psql. Поведение управляется env-переменными:
+#   SHIM_PSQL_FAIL=1        — завершиться с ошибкой (код 1)
+#   SHIM_PSQL_LIST="a b c"  — вернуть список баз (автоопрос)
+# По умолчанию — отвечает «1» (проверка подключения).
+if [[ "${SHIM_PSQL_FAIL:-0}" == "1" ]]; then
+  echo "psql: error: connection to server failed" >&2
+  exit 1
+fi
+if [[ -n "${SHIM_PSQL_LIST:-}" ]]; then
+  dbs=()
+  read -r -a dbs <<<"$SHIM_PSQL_LIST"
+  printf '%s\n' "${dbs[@]}"
+  exit 0
+fi
+echo "1"
+exit 0
